@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion | Inscription</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sign.css') }}">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="auth-toggle">
+                <a href="/sign?mode=signin" class="toggle-link {% if mode == 'signin' %}active{% endif %}">Se connecter</a>
+                <a href="/sign?mode=signup" class="toggle-link {% if mode == 'signup' %}active{% endif %}">S'inscrire</a>
+            </div>
+        </div>
+
+        <div class="auth-body">
+            {% if error %}
+            <div class="error-message">{{ error }}</div>
+            {% endif %}
+
+            {% if success %}
+            <div class="success-message">{{ success }}</div>
+            {% endif %}
+
+            {% if info %}
+            <div class="info-message">{{ info }}</div>
+            {% endif %}
+
+            {% if mode == 'signin' %}
+                <!-- Sign In with Password -->
+                {% if auth_method != 'otp' %}
+                <form method="POST" action="/sign/signin">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" name="email" placeholder="votre@email.com" required value="{{ email or '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Mot de passe</label>
+                        <input type="password" class="form-input" name="password" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="method-toggle">
+                        <a href="/sign?mode=signin&auth_method=otp" class="method-link">Se connecter avec OTP</a>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Se connecter</button>
+                </form>
+                {% else %}
+                <!-- Sign In with OTP -->
+                <form method="POST" action="{% if otp_sent %}/sign/verify-otp{% else %}/sign/send-otp{% endif %}">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" name="email" placeholder="votre@email.com" required value="{{ email or '' }}" {% if otp_sent %}readonly{% endif %}>
+                    </div>
+
+                    {% if otp_sent %}
+                    <div class="form-group">
+                        <label class="form-label">Entrer l'OTP</label>
+                        <input type="text" class="form-input" name="otp" placeholder="123456" maxlength="6" required autofocus>
+                    </div>
+                    {% endif %}
+
+                    <div class="method-toggle">
+                        <a href="/sign?mode=signin" class="method-link">Se connecter avec mot de passe</a>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        {% if otp_sent %}Vérifier l'OTP{% else %}Recevoir l'OTP{% endif %}
+                    </button>
+                </form>
+                {% endif %}
+
+            {% else %}
+                <!-- Sign Up Form -->
+                <form method="POST" action="/sign/signup">
+                    <div class="form-group">
+                        <label class="form-label">Nom complet</label>
+                        <input type="text" class="form-input" name="name" placeholder="Jean Dupont" required value="{{ name or '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" name="email" placeholder="votre@email.com" required value="{{ email or '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Mot de passe</label>
+                        <input type="password" class="form-input" name="password" placeholder="••••••••" required minlength="6">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confirmer le mot de passe</label>
+                        <input type="password" class="form-input" name="confirm_password" placeholder="••••••••" required minlength="6">
+                    </div>
+
+                    <button type="submit" class="submit-btn">Créer un compte</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
