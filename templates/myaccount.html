@@ -304,7 +304,7 @@
                     <span>Mon Compte</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 20px;">
-                    <a href="{{ url_for('index') }}" class="text-[#FF9A8B] hover:text-[#D87A6B] font-medium">Accueil</a>
+                    <a href="/" class="text-[#FF9A8B] hover:text-[#D87A6B] font-medium">Accueil</a>
                     <div class="user-info" style="display: flex; align-items: center; gap: 10px;">
                         <span id="user-email" class="text-gray-600"></span>
                         <button id="logout-btn" class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-lg transition-all duration-300">
@@ -381,7 +381,7 @@
                 <div class="footer-column">
                     <h3>Navigation</h3>
                     <ul class="footer-links">
-                        <li><a href="{{ url_for('index') }}">Accueil</a></li>
+                        <li><a href="/">Accueil</a></li>
                         <li><a href="#generator">Générateur</a></li>
                         <li><a href="#how-it-works">Comment ça marche</a></li>
                     </ul>
@@ -427,7 +427,7 @@
                     <input type="text" id="password" class="form-input" placeholder="Votre mot de passe" required>
                     <div class="form-error" id="password-error">Le mot de passe est requis</div>
                     <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
-                        <a href="{{ url_for('index') }}" class="generator-link" target="_blank">
+                        <a href="/" class="generator-link" target="_blank">
                             <span>Générer un mot de passe sécurisé</span>
                         </a>
                     </div>
@@ -737,131 +737,111 @@
         }
 
         // Fonctions API
-        async function fetchUserData() {
-            try {
-                const response = await fetch('/user');
-                const data = await response.json();
-                
-                if (data.success) {
-                    userData = data.user;
-                    userEmailElement.textContent = userData.email;
-                    await fetchPasswords();
-                } else {
-                    window.location.href = '/sign';
-                }
-            } catch (error) {
-                console.error('Erreur lors de la récupération des données utilisateur:', error);
-                window.location.href = '/sign';
-            }
+async function fetchUserData() {
+    try {
+        const response = await fetch('/user');
+        const data = await response.json();
+        
+        if (data.success) {
+            userData = data.user;
+            userEmailElement.textContent = userData.email;
+            await fetchPasswords();
+        } else {
+            window.location.href = '/sign';
         }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des données utilisateur:', error);
+        window.location.href = '/sign';
+    }
+}
 
-        async function fetchPasswords() {
-            try {
-                // Ici, vous devriez implémenter l'endpoint pour récupérer les mots de passe
-                // Pour l'instant, on simule des données
-                // TODO: Implémenter l'endpoint API pour récupérer les mots de passe
-                
-                // Exemple de données simulées
-                /*
-                passwords = [
-                    {
-                        id: 1,
-                        site_url: 'https://facebook.com',
-                        password: 'FbP@ss123!',
-                        description: 'Compte personnel Facebook',
-                        created_at: '2024-01-15T14:30:00Z'
-                    },
-                    {
-                        id: 2,
-                        site_url: 'https://github.com',
-                        password: 'Gh$ecure456',
-                        description: 'Compte développeur GitHub',
-                        created_at: '2024-01-10T09:15:00Z'
-                    },
-                    {
-                        id: 3,
-                        site_url: 'https://google.com',
-                        password: 'weak123',
-                        description: 'Compte Google',
-                        created_at: '2024-01-05T16:45:00Z'
-                    }
-                ];
-                */
-                
-                updatePasswordList();
-            } catch (error) {
-                console.error('Erreur lors de la récupération des mots de passe:', error);
-                showNotification('Erreur lors du chargement des mots de passe', true);
-            }
+async function fetchPasswords() {
+    try {
+        const response = await fetch('/api/passwords');
+        const data = await response.json();
+        
+        if (data.success) {
+            passwords = data.passwords;
+            updatePasswordList();
+        } else {
+            showNotification('Erreur lors du chargement des mots de passe', true);
         }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des mots de passe:', error);
+        showNotification('Erreur lors du chargement des mots de passe', true);
+    }
+}
 
-        async function savePassword(siteUrl, password, description) {
-            try {
-                showLoading(true);
-                
-                // Ici, vous devriez implémenter l'appel à votre endpoint API
-                // Pour l'instant, on simule une sauvegarde réussie
-                // TODO: Implémenter l'endpoint API pour sauvegarder un mot de passe
-                
-                // Simuler un délai de réseau
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                const newPassword = {
-                    id: Date.now(),
-                    site_url: siteUrl,
-                    password: password,
-                    description: description,
-                    created_at: new Date().toISOString()
-                };
-                
-                passwords.unshift(newPassword);
-                updatePasswordList();
-                
-                closeSavePasswordPopup();
-                showNotification('Mot de passe sauvegardé avec succès !');
-            } catch (error) {
-                console.error('Erreur lors de la sauvegarde du mot de passe:', error);
-                showNotification('Erreur lors de la sauvegarde', true);
-            } finally {
-                showLoading(false);
-            }
+async function savePassword(siteUrl, password, description) {
+    try {
+        showLoading(true);
+        
+        const response = await fetch('/api/passwords', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                site_url: siteUrl,
+                password: password,
+                description: description
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            await fetchPasswords(); // Recharger la liste
+            closeSavePasswordPopup();
+            showNotification('Mot de passe sauvegardé avec succès !');
+        } else {
+            showNotification(data.message || 'Erreur lors de la sauvegarde', true);
         }
+    } catch (error) {
+        console.error('Erreur lors de la sauvegarde du mot de passe:', error);
+        showNotification('Erreur lors de la sauvegarde', true);
+    } finally {
+        showLoading(false);
+    }
+}
 
-        async function deletePassword(passwordId) {
-            try {
-                // Ici, vous devriez implémenter l'appel à votre endpoint API
-                // Pour l'instant, on simule une suppression réussie
-                // TODO: Implémenter l'endpoint API pour supprimer un mot de passe
-                
-                passwords = passwords.filter(p => p.id !== passwordId);
-                updatePasswordList();
-                
-                showNotification('Mot de passe supprimé avec succès');
-            } catch (error) {
-                console.error('Erreur lors de la suppression du mot de passe:', error);
-                showNotification('Erreur lors de la suppression', true);
-            }
+async function deletePassword(passwordId) {
+    try {
+        const response = await fetch(`/api/passwords/${passwordId}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            await fetchPasswords(); // Recharger la liste
+            showNotification('Mot de passe supprimé avec succès');
+        } else {
+            showNotification(data.message || 'Erreur lors de la suppression', true);
         }
+    } catch (error) {
+        console.error('Erreur lors de la suppression du mot de passe:', error);
+        showNotification('Erreur lors de la suppression', true);
+    }
+}
 
-        async function logout() {
-            try {
-                const response = await fetch('/logout', {
-                    method: 'POST'
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    window.location.href = '/';
-                } else {
-                    showNotification('Erreur lors de la déconnexion', true);
-                }
-            } catch (error) {
-                console.error('Erreur lors de la déconnexion:', error);
-                showNotification('Erreur lors de la déconnexion', true);
-            }
-        }
+async function logout() {
+    try {
+        const response = await fetch('/logout', {
+            method: 'POST'
+        });
+        
+        // Rediriger directement, peu importe la réponse
+        window.location.href = '/sign';
+    } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error);
+        // Forcer la redirection même en cas d'erreur
+        window.location.href = '/sign';
+    }
+}
 
+
+        
         // Événements
         logoutButton.addEventListener('click', logout);
         
