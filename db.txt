@@ -22,3 +22,27 @@ CREATE TABLE otp_codes (
 
 -- Index pour nettoyer les OTP expirés
 CREATE INDEX idx_otp_expires ON otp_codes(expires_at);
+
+-- Créer la table pour sauvegarder les mots de passe
+CREATE TABLE IF NOT EXISTS saved_passwords (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    password TEXT NOT NULL,
+    label TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Index pour rechercher rapidement les mots de passe d'un utilisateur
+CREATE INDEX IF NOT EXISTS idx_saved_passwords_user ON saved_passwords(user_id);
+
+-- Désactiver RLS pour l'instant
+ALTER TABLE saved_passwords DISABLE ROW LEVEL SECURITY;
+
+-- Ajouter les colonnes manquantes à la table saved_passwords
+ALTER TABLE saved_passwords 
+ADD COLUMN IF NOT EXISTS site_url TEXT,
+ADD COLUMN IF NOT EXISTS description TEXT;
+
+-- Renommer la colonne label en site_url si elle existe
+-- (si vous aviez déjà créé la table avec 'label')
+-- ALTER TABLE saved_passwords RENAME COLUMN label TO site_url;
