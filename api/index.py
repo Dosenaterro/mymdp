@@ -12,7 +12,7 @@ import hashlib
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this')
+app.secret_key = os.getenv('ac66c5cceef5d6e2ad9e53e458f753ab69116c1fda3a5cf8298b3258ffe44da1', 'your-secret-key-change-this')
 
 # Configuration Flask-Mail
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
@@ -25,8 +25,8 @@ app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 mail = Mail(app)
 
 # Configuration Supabase
-SUPABASE_URL = os.getenv('SUPABASE_URL')
-SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+SUPABASE_URL = os.getenv('https://ufzpkwrfvvmprvfwufrx.supabase.co')
+SUPABASE_KEY = os.getenv('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmenBrd3JmdnZtcHJ2Znd1ZnJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDMxNTMsImV4cCI6MjA4NTAxOTE1M30.VDqeMeUQyeMpOPctABGR1J8Go-zSqGX_OC78LcSCSZI')
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("Les variables SUPABASE_URL et SUPABASE_KEY doivent être définies dans le fichier .env")
