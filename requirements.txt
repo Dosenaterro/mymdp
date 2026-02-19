@@ -1,5 +1,4 @@
 Flask==3.1.2
-python==3.12.9
 Werkzeug==3.1.5
 flask-mail==0.9.1
 supabase==2.3.0
